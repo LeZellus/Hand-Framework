@@ -1,0 +1,11 @@
+{
+    "name": "matheozeller/hand-framework",
+    "description": "Hand-Framework, Framework based on Symfony Logic",
+    "authors": [
+        {
+            "name": "Zeller",
+            "email": "matheo.zeller@gmail.com"
+        }
+    ],
+    "require": {}
+}
