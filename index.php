@@ -1,5 +1,6 @@
 <?php
 
-$name = isset($_GET['name']) ? $_GET['name'] : "world";
+$name = $_GET['name'] ?? 'World';
 
 printf('hello %s', $name);
+
