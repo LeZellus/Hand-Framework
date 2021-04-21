@@ -2,6 +2,8 @@
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
+use Symfony\Component\HttpKernel\Controller\ControllerResolver;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
@@ -19,28 +21,16 @@ $context->fromRequest($request);
 
 $urlMatcher = new UrlMatcher($routes, $context);
 
+$controllerResolver = new ControllerResolver();
+$argumentResolver = new ArgumentResolver();
+
 try {
-    $result = $urlMatcher->match($request->getPathInfo());
-    $request->attributes->add($result);
+    $request->attributes->add($urlMatcher->match($request->getPathInfo()));
 
-    // Class to be instancied
-    $className = substr(
-        $result['_controller'],
-        0,
-        strpos($result['_controller'], '@')
-    );
+    $controller = $controllerResolver->getController($request);
+    $arguments = $argumentResolver->getArguments($request, $controller);
 
-    // Method to be call
-    $methodName = substr(
-        $result['_controller'],
-        strpos($result['_controller'], '@') + 1
-    );
-
-    // Callable
-    $controller = [new $className, $methodName];
-
-    $response = call_user_func($controller, $request);
-
+    $response = call_user_func_array($controller, $arguments);
 } catch (ResourceNotFoundException $e) {
     $response = new Response("La page n'existe pas", 404);
 } catch (Exception $e) {
