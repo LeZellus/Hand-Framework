@@ -11,6 +11,7 @@
         "phpunit/phpunit": "^9.5"
     },
     "require": {
+        "php": ">=7.4",
         "symfony/http-foundation": "^5.2",
         "symfony/routing": "^5.2",
         "symfony/http-kernel": "^5.2"
