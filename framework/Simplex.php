@@ -5,31 +5,36 @@ namespace Framework;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
-use Symfony\Component\HttpKernel\Controller\ControllerResolver;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
+use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
-use Symfony\Component\Routing\Matcher\UrlMatcher;
-use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 
 class Simplex
 {
+    protected UrlMatcherInterface $urlMatcher;
+    protected ControllerResolverInterface $controllerResolver;
+    protected ArgumentResolverInterface $argumentResolver;
+
+    public function __construct(
+        UrlMatcherInterface $urlMatcher,
+        ControllerResolverInterface $controllerResolver,
+        ArgumentResolverInterface $argumentResolver)
+    {
+        $this->urlMatcher = $urlMatcher;
+        $this->controllerResolver = $controllerResolver;
+        $this->argumentResolver = $argumentResolver;
+    }
+
     public function handle(Request $request)
     {
-        $routes = require __DIR__ . '/../src/routes.php';
-
-        $context = new RequestContext();
-        $context->fromRequest($request);
-
-        $urlMatcher = new UrlMatcher($routes, $context);
-
-        $controllerResolver = new ControllerResolver();
-        $argumentResolver = new ArgumentResolver();
+        $this->urlMatcher->getContext()->fromRequest($request);
 
         try {
-            $request->attributes->add($urlMatcher->match($request->getPathInfo()));
+            $request->attributes->add($this->urlMatcher->match($request->getPathInfo()));
 
-            $controller = $controllerResolver->getController($request);
-            $arguments = $argumentResolver->getArguments($request, $controller);
+            $controller = $this->controllerResolver->getController($request);
+            $arguments = $this->argumentResolver->getArguments($request, $controller);
 
             $response = call_user_func_array($controller, $arguments);
         } catch (ResourceNotFoundException $e) {

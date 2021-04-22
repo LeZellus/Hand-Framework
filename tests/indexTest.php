@@ -3,14 +3,24 @@
 use Framework\Simplex;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
+use Symfony\Component\HttpKernel\Controller\ControllerResolver;
+use Symfony\Component\Routing\Matcher\UrlMatcher;
+use Symfony\Component\Routing\RequestContext;
 
-class IndexTest extends TestCase
+class indexTest extends TestCase
 {
     protected Simplex $framework;
 
     protected function setUp(): void
     {
-        $this->framework = new Simplex;
+        $routes = require __DIR__ . '/../src/routes.php';
+
+        $urlMatcher = new UrlMatcher($routes, new RequestContext());
+
+        $controllerResolver = new ControllerResolver();
+        $argumentResolver = new ArgumentResolver();
+        $this->framework = new Simplex($urlMatcher, $controllerResolver, $argumentResolver);
     }
 
     public function testHello()
