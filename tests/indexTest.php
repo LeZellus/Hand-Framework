@@ -1,18 +1,33 @@
 <?php
 
-use PHPUnit\Framework\ExpectationFailedException;
+use Framework\Simplex;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Request;
 
 class IndexTest extends TestCase
 {
+    protected Simplex $framework;
+
+    protected function setUp(): void
+    {
+        $this->framework = new Simplex;
+    }
+
     public function testHello()
     {
-        $_GET['name'] = 'Fabien';
+        $request = Request::create('/hello/lior');
 
-        ob_start();
-        include 'index.php';
-        $content = ob_get_clean();
+        $response = $this->framework->handle($request);
 
-        $this->assertEquals('Hello Fabien', $content);
+        $this->assertEquals('Hello lior', $response->getContent());
+    }
+
+    public function testBye()
+    {
+        $request = Request::create('/bye');
+
+        $response = $this->framework->handle($request);
+
+        $this->assertEquals('<h1>Goodbye !</h1>', $response->getContent());
     }
 }
